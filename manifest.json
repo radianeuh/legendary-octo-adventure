@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Turkey Fake Address Popup",
+  "description": "Fetch and display random Turkey address data from fakeaddressgenerator.com.",
+  "version": "1.0.0",
+  "permissions": ["storage"],
+  "host_permissions": ["https://www.fakeaddressgenerator.com/*"],
+  "action": {
+    "default_title": "Turkey Fake Address",
+    "default_popup": "popup.html"
+  }
+}
