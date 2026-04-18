@@ -9,6 +9,7 @@ A simple Chrome extension popup that fetches fake Turkey address data from:
 - First popup open: fetches once and stores the parsed data.
 - Reopening popup: uses cached data (no automatic refetch).
 - Clicking **Refresh**: fetches new data and replaces cache.
+- If the source site serves a Cloudflare challenge page, the popup shows a clear error message instead of parsing invalid HTML.
 - Popup UI uses dark mode styling.
 
 ## Load extension

@@ -1,5 +1,10 @@
 const TARGET_URL = "https://www.fakeaddressgenerator.com/All_countries/address/country/Turkey";
 const STORAGE_KEY = "turkeyAddressCache";
+const CLOUDFLARE_CHALLENGE_TITLE = "just a moment...";
+const CLOUDFLARE_CHALLENGE_TEXT = "Enable JavaScript and cookies to continue";
+const CLOUDFLARE_CHALLENGE_TEXT_LOWER = CLOUDFLARE_CHALLENGE_TEXT.toLowerCase();
+const CLOUDFLARE_CHALLENGE_SCRIPT_SELECTOR = "script[src*='/cdn-cgi/challenge-platform']";
+const CLOUDFLARE_CHALLENGE_JS_MARKER = "window._cf_chl_opt";
 
 const refreshButton = document.getElementById("refreshButton");
 const statusElement = document.getElementById("status");
@@ -61,6 +66,19 @@ function parseAddressData(html) {
   return sections;
 }
 
+function isCloudflareChallengePage(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const title = cleanText(doc.title || "").toLowerCase();
+  const bodyText = cleanText(doc.body?.textContent || "").toLowerCase();
+
+  return (
+    title.includes(CLOUDFLARE_CHALLENGE_TITLE) ||
+    bodyText.includes(CLOUDFLARE_CHALLENGE_TEXT_LOWER) ||
+    Boolean(doc.querySelector(CLOUDFLARE_CHALLENGE_SCRIPT_SELECTOR)) ||
+    html.includes(CLOUDFLARE_CHALLENGE_JS_MARKER)
+  );
+}
+
 function render(data) {
   dataContainer.innerHTML = "";
 
@@ -109,6 +127,10 @@ async function fetchAndStore() {
     }
 
     const html = await response.text();
+    if (isCloudflareChallengePage(html)) {
+      throw new Error("The source website is currently protected by Cloudflare and blocked this request. Please try again later.");
+    }
+
     const sections = parseAddressData(html);
 
     if (!sections.length) {
