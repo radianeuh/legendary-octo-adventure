@@ -61,6 +61,19 @@ function parseAddressData(html) {
   return sections;
 }
 
+function isCloudflareChallengePage(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const title = cleanText(doc.title || "").toLowerCase();
+  const bodyText = cleanText(doc.body?.textContent || "");
+
+  return (
+    title === "just a moment..." ||
+    bodyText.includes("enable javascript and cookies to continue") ||
+    Boolean(doc.querySelector("script[src*='/cdn-cgi/challenge-platform']")) ||
+    html.includes("window._cf_chl_opt")
+  );
+}
+
 function render(data) {
   dataContainer.innerHTML = "";
 
@@ -109,6 +122,10 @@ async function fetchAndStore() {
     }
 
     const html = await response.text();
+    if (isCloudflareChallengePage(html)) {
+      throw new Error("The source website is currently protected by Cloudflare and blocked this request.");
+    }
+
     const sections = parseAddressData(html);
 
     if (!sections.length) {
